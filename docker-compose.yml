@@ -1,0 +1,66 @@
+version: '1'
+services:
+  directus:
+    image: directus/directus:latest
+    ports:
+      - 8055:8055
+    volumes:
+      - ./uploads:/directus/uploads
+    depends_on:
+      - db
+      - redis
+    environment:
+      KEY: '255d861b-5ea1-5996-9aa3-922530ec40b175'
+      SECRET: '6116487b-cda1-52c2-b5b5-c8022c45e26393'
+
+      # DB CONFIGURATION
+      DB_CLIENT: 'pg'
+      DB_HOST: 'db'
+      DB_PORT: '5432'
+      DB_DATABASE: 'directus'
+      DB_USER: 'directus'
+      DB_PASSWORD_FILE: /run/secrets/db_password
+
+      CACHE_ENABLED: 'true'
+      CACHE_STORE: 'redis'
+      REDIS: 'redis://redis:6379'
+
+      # DEFAULT ADMIN USER
+      ADMIN_EMAIL_FILE: /run/secrets/directus_admin_email
+      ADMIN_PASSWORD_FILE: /run/secrets/directus_admin_password
+
+      #WEBSOCKETS
+      WEBSOCKETS_ENABLED: 'true'
+      WEBSOCKETS_REST_ENABLED: 'true'
+      WEBSOCKETS_REST_AUTH: 'handshake'
+      WEBSOCKETS_REST_AUTH_TIMEOUT: 15
+    secrets:
+      - db_password
+      - directus_admin_email
+      - directus_admin_password
+
+  db:
+    image: postgis/postgis:13-master
+    # Required when running on platform other than amd64, like Apple M1/M2:
+    # platform: linux/amd64
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 'directus'
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: 'directus'
+    secrets:
+      - db_password
+
+  redis:
+    image: redis:6
+    ports:
+      - '6379:6379'
+
+secrets:
+  directus_admin_email:
+    file: cred-admin_email.txt
+  directus_admin_password:
+    file: cred-admin_password.txt
+  db_password:
+    file: cred-db_password.txt

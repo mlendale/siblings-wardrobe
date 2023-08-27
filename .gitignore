@@ -1,0 +1,6 @@
+# Files containing personal credentials related to this project.
+cred-*
+
+# Database content
+uploads/
+data/

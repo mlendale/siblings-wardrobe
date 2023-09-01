@@ -1,5 +1,16 @@
 version: '1'
 services:
+  client:
+    image: node:18-alpine
+    build:
+      context: '.'
+      dockerfile: 'Dockerfile'
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    ports:
+      - 3000:3000
+
   directus:
     image: directus/directus:latest
     ports:
